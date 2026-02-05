@@ -2,6 +2,7 @@
 
 import "leaflet/dist/leaflet.css";
 import { MapContainer, TileLayer, useMap, useMapEvents } from "react-leaflet";
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { LatLngTuple } from 'leaflet';
 import { memo, useContext, useEffect, useState, useCallback, useMemo } from "react";
 import { SlidesControlContext } from "@/app/page";
@@ -31,14 +32,12 @@ const MapEventsHandler = ({
 
   useMapEvents({
     click: (e) => {
-      // Chỉ kích hoạt callback nếu đang ở chế độ chọn
       if (isSelecting) {
         onMapClick([e.latlng.lat, e.latlng.lng]);
       }
     },
   });
 
-  // UX: Đổi con trỏ chuột khi đang chọn điểm
   useEffect(() => {
     const container = map.getContainer();
     if (isSelecting) {
@@ -51,9 +50,7 @@ const MapEventsHandler = ({
   return null;
 };
 
-// --- Component: Update Map State (Giữ nguyên logic của bạn) ---
 const UpdateMapState = memo(({ mapViewWorkaround } : { mapViewWorkaround: number }) => {
-    // Lưu ý: Đảm bảo SlidesControlContext tồn tại ở component cha
     const context = useContext(SlidesControlContext);
     const map = useMap();
 
@@ -61,16 +58,12 @@ const UpdateMapState = memo(({ mapViewWorkaround } : { mapViewWorkaround: number
         if (!context) return;
         const { slides, setSlides, currentSlideIndex, previousSlideIndex } = context;
 
-        // Save previous slide state
         if (previousSlideIndex >= 0 && slides[previousSlideIndex]) {
             const previousSlide = slides[previousSlideIndex];
             previousSlide.latLng = [map.getCenter().lat, map.getCenter().lng];
             previousSlide.mapZoom = map.getZoom();
-            // Cập nhật slides (cần cẩn thận deep copy nếu state phức tạp)
-             // setSlides logic... (giữ nguyên logic của bạn nếu nó đã chạy đúng)
         }
 
-        // Fly to current slide
         const currentSlide = slides[currentSlideIndex];
         if (currentSlide) {
              const { latLng, mapZoom } = currentSlide;
@@ -83,27 +76,26 @@ const UpdateMapState = memo(({ mapViewWorkaround } : { mapViewWorkaround: number
     return null;
 });
 
-// --- MAIN COMPONENT ---
 const Map = memo(({ mapViewWorkaround } : { mapViewWorkaround: number }) => {
     const [startPoint, setStartPoint] = useState<LatLngTuple | null>(null);
     const [endPoint, setEndPoint] = useState<LatLngTuple | null>(null);
     const [route, setRoute] = useState<RouteResult | null>(null);
     
-    // State quản lý chế độ chọn: 'start' | 'end' | null
     const [selectionMode, setSelectionMode] = useState<'start' | 'end' | null>(null);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    
 
-    // Xử lý khi click vào map
+
     const handleMapClick = useCallback((latlng: LatLngTuple) => {
         if (selectionMode === 'start') {
             setStartPoint(latlng);
-            setSelectionMode(null); // Tắt chế độ chọn ngay sau khi click
+            setSelectionMode(null);
         } else if (selectionMode === 'end') {
             setEndPoint(latlng);
             setSelectionMode(null);
         }
     }, [selectionMode]);
 
-    // Các handlers cho RoutingPanel
     const handleRouteCalculated = useCallback((result: RouteResult) => setRoute(result), []);
     
     const handleClearRoute = useCallback(() => {
@@ -113,7 +105,6 @@ const Map = memo(({ mapViewWorkaround } : { mapViewWorkaround: number }) => {
         setSelectionMode(null);
     }, []);
 
-    // Inject styles vào head
     useEffect(() => {
         const styleId = 'inspection-styles';
         if (!document.getElementById(styleId)) {
@@ -125,23 +116,58 @@ const Map = memo(({ mapViewWorkaround } : { mapViewWorkaround: number }) => {
     }, []);
 
     return (
-        <div className="flex w-full h-screen overflow-hidden">
-            <div className="w-96 min-w-[24rem] bg-slate-900 border-r border-slate-700 flex flex-col z-[1001] shadow-xl">
-                <div className="p-4 overflow-y-auto flex-1">
-                    <RoutingPanel
-                        startPoint={startPoint}
-                        endPoint={endPoint}
-                        onSelectStartMode={() => setSelectionMode('start')}
-                        onSelectEndMode={() => setSelectionMode('end')}
-                        onRouteCalculated={handleRouteCalculated}
-                        onClearRoute={handleClearRoute}
-                    />
+        <div className="flex w-full h-screen overflow-hidden relative">
+            
+            <div 
+                className={`
+                    bg-slate-900 border-r border-slate-700 flex flex-col z-[1001] shadow-xl
+                    transition-all duration-300 ease-in-out
+                    ${isSidebarOpen ? 'w-96 translate-x-0 opacity-100' : 'w-0 -translate-x-full opacity-0 border-none'}
+                `}
+            >
+                <div className="w-96 min-w-[24rem] h-full flex flex-col overflow-hidden">
+                    <div className="p-4 overflow-y-auto flex-1">
+                        <RoutingPanel
+                            startPoint={startPoint}
+                            endPoint={endPoint}
+                            onSelectStartMode={() => setSelectionMode('start')}
+                            onSelectEndMode={() => setSelectionMode('end')}
+                            onRouteCalculated={handleRouteCalculated}
+                            onClearRoute={handleClearRoute}
+                        />
+                    </div>
                 </div>
             </div>
 
-            {/* Map Area */}
-            <div className="flex-1 relative h-full">
-                {/* Banner thông báo UX khi đang chọn điểm */}
+
+            <div className="flex-1 relative h-full w-full">
+                
+                <button
+                    onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                    className={`
+                        absolute top-[80px] z-[1002] bg-white text-slate-700 p-2 rounded-md shadow-md hover:bg-slate-100 transition-all duration-300 border border-slate-300
+                        ${isSidebarOpen ? 'left-[-15px] opacity-0 pointer-events-none' : 'left-3 opacity-100'} 
+                    `}
+                    title="Mở bảng điều khiển"
+                >
+                    <ChevronRight size={20} />
+                </button>
+                <button
+                    onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                    className={`
+                        absolute top-1/2 -translate-y-1/2 z-[1002] 
+                        bg-slate-800 text-white border border-slate-600 border-l-0
+                        h-12 w-6 flex items-center justify-center rounded-r-md shadow-lg
+                        transition-all duration-300 hover:bg-slate-700
+                        ${isSidebarOpen ? 'left-0' : '-left-8'} 
+                    `}
+                    title={isSidebarOpen ? "Thu gọn" : "Mở rộng"}
+                >
+                   {isSidebarOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+                </button>
+
+
+                {/* BANNER THÔNG BÁO CHỌN ĐIỂM */}
                 {selectionMode && (
                     <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] bg-blue-600/90 text-white px-6 py-3 rounded-full shadow-lg backdrop-blur-sm flex items-center gap-3 animate-in fade-in slide-in-from-top-4">
                         <span className="font-medium">
@@ -163,9 +189,6 @@ const Map = memo(({ mapViewWorkaround } : { mapViewWorkaround: number }) => {
                     keyboard={false}
                     doubleClickZoom={false}
                 >
-                    {/* Logic update slide */}
-                    {/* <UpdateMapState mapViewWorkaround={mapViewWorkaround} /> */}
-
                     <TileLayer
                         attribution='&copy; Google Maps'
                         url="http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
@@ -176,13 +199,10 @@ const Map = memo(({ mapViewWorkaround } : { mapViewWorkaround: number }) => {
                     <Layers />
                     <InspectingLayer />
 
-                    {/* Xử lý click chọn điểm */}
                     <MapEventsHandler 
                         onMapClick={handleMapClick} 
                         isSelecting={selectionMode !== null} 
                     />
-
-                    {/* Hiển thị đường đi */}
                     <RouteLayer
                         route={route}
                         startPoint={startPoint}

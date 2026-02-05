@@ -5,11 +5,8 @@ import { MapPin, Navigation, Loader2, X, Car, PersonStanding, Bike, ArrowRightLe
 import { cn } from '@/lib/utils';
 
 interface RoutingPanelProps {
-  // Dữ liệu từ Map truyền xuống
   startPoint: LatLngTuple | null;
   endPoint: LatLngTuple | null;
-  
-  // Actions gửi ngược lên Map
   onSelectStartMode: () => void;
   onSelectEndMode: () => void;
   onRouteCalculated?: (route: RouteResult) => void;
@@ -26,11 +23,7 @@ export function RoutingPanel({
 }: RoutingPanelProps) {
   const [mode, setMode] = useState<'driving' | 'walking' | 'cycling'>('driving');
   const [route, setRoute] = useState<RouteResult | null>(null);
-
-  // Hook xử lý API tìm đường
   const { findRoute, loading, error } = useRouting();
-
-  // 1. Tự động tính toán khi có đủ 2 điểm
   useEffect(() => {
     if (startPoint && endPoint) {
       findRoute(startPoint, endPoint, mode).then(result => {
@@ -42,15 +35,14 @@ export function RoutingPanel({
     }
   }, [startPoint, endPoint, mode, findRoute, onRouteCalculated]);
 
-  // 2. Xử lý nút xóa
+
   const handleClear = useCallback(() => {
     setRoute(null);
-    onClearRoute?.(); // Gọi lên Map để xóa điểm trên bản đồ
+    onClearRoute?.(); 
   }, [onClearRoute]);
 
   return (
     <div className="bg-slate-800 rounded-lg shadow-lg p-4 space-y-4 text-slate-200">
-      {/* Header */}
       <div className="flex items-center justify-between border-b border-slate-700 pb-3">
         <h3 className="font-semibold text-lg flex items-center gap-2 text-white">
           <Navigation size={20} className="text-blue-500" />
@@ -66,8 +58,6 @@ export function RoutingPanel({
           </button>
         )}
       </div>
-
-      {/* Travel Mode Selection */}
       <div className="grid grid-cols-3 gap-2 bg-slate-900/50 p-1 rounded-lg">
         {[
           { id: 'driving', icon: Car, label: 'Xe hơi' },
@@ -110,8 +100,6 @@ export function RoutingPanel({
             </button>
           </div>
         </div>
-
-        {/* End Point Input */}
         <div className="group relative z-10">
           <div className="flex items-center gap-3">
             <MapPin size={16} className="text-red-500 flex-shrink-0 fill-red-500/20" />

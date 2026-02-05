@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { LatLngTuple } from 'leaflet';
 
+const ORS_API_KEY = process.env.NEXT_PUBLIC_ORS_API_KEY;
 export interface RouteStep {
   distance: number; 
   duration: number; 
@@ -35,8 +36,8 @@ export function useRouting() {
     setError(null);
 
     try {
-      const profile = mode === 'walking' ? 'foot' : mode === 'cycling' ? 'bike' : 'car';
-      
+      const profile = mode === 'walking' ? 'foot' : mode === 'cycling' ? 'bike' : 'driving';
+
       const url = `https://router.project-osrm.org/route/v1/${profile}/${start[1]},${start[0]};${end[1]},${end[0]}?overview=full&steps=true&geometries=geojson`;
 
       const response = await fetch(url);
