@@ -12,6 +12,7 @@ import Layers from "./layers";
 import { RoutingPanel } from '@/components/home/routing-panel';
 import { RouteLayer } from '@/components/home/route-layer';
 import { RouteResult } from '@/hooks/useRouting';
+import { MapSearch } from "./map-search";
 
 const inspectionStyles = `
   .custom-corner-marker div { transition: transform 0.2s ease; }
@@ -116,7 +117,7 @@ const Map = memo(({ mapViewWorkaround } : { mapViewWorkaround: number }) => {
     }, []);
 
     return (
-        <div className="flex w-full h-screen overflow-hidden relative">
+        <div className="flex w-full h-full overflow-hidden relative">
             
             <div 
                 className={`
@@ -181,14 +182,17 @@ const Map = memo(({ mapViewWorkaround } : { mapViewWorkaround: number }) => {
                         </button>
                     </div>
                 )}
-
+                
                 <MapContainer
                     center={[21.03, 105.804]}
                     zoom={16}
                     style={{ height: "100%", width: "100%" }}
                     keyboard={false}
                     doubleClickZoom={false}
-                >
+                >   
+                    {
+                        isSidebarOpen ? <MapSearch /> : null
+                    }
                     <TileLayer
                         attribution='&copy; Google Maps'
                         url="http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
