@@ -11,6 +11,32 @@ interface DrawingLayerProps {
   onShapeCreated?: (layer: any) => void;
 }
 
+function circleToLatLngs(
+  center: LatLngTuple,
+  radius: number,
+  points = 16
+): LatLngTuple[] {
+  const lat = center[0];
+  const lng = center[1];
+
+  const latRad = (lat * Math.PI) / 180;
+  const degLat = radius / 111320;
+  const degLng = radius / (111320 * Math.cos(latRad));
+
+  const coords: LatLngTuple[] = [];
+
+  for (let i = 0; i < points; i++) {
+    const angle = (i / points) * 2 * Math.PI;
+    coords.push([
+      lat + degLat * Math.sin(angle),
+      lng + degLng * Math.cos(angle),
+    ]);
+  }
+
+  return coords;
+}
+
+
 const DrawingLayer = memo(({ onShapeCreated }: DrawingLayerProps) => {
     const [rectOrgin, setRectOrigin] = useState<LatLngTuple | null>();
     const [rectBounds, setRectBounds] = useState<LatLngBoundsExpression | null>();
@@ -173,6 +199,14 @@ const DrawingLayer = memo(({ onShapeCreated }: DrawingLayerProps) => {
                             };
                             newLayer.realLifeArea = Math.PI * Math.pow(circleRadius, 2);
                             setInspectingLayerId(newLayer.uuid);
+                            shapeForStats = {
+                                getLatLngs: () => [
+                                    circleToLatLngs(
+                                    circleCenter as LatLngTuple,
+                                    circleRadius
+                                    )
+                                ]
+                                };
                         }
                         break;
                     case 2:

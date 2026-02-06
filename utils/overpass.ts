@@ -6,15 +6,14 @@ export interface PoiStat {
   fill: string;
 }
 
-// Danh sách các server Overpass mirror
+
 const OVERPASS_SERVERS = [
-  "https://overpass.kumi.systems/api/interpreter", // Thường nhanh nhất
-  "https://overpass-api.de/api/interpreter",       // Mặc định (hay quá tải)
-  "https://lz4.overpass-api.de/api/interpreter"    // Backup
+  "https://overpass.kumi.systems/api/interpreter", 
+  "https://overpass-api.de/api/interpreter",     
+  "https://lz4.overpass-api.de/api/interpreter"   
 ];
 
 export const fetchPoiStatistics = async (polygon: LatLngTuple[]): Promise<PoiStat[]> => {
-  // 1. Tối ưu toạ độ: Chỉ lấy 5 số thập phân
   const polyCoords = polygon
     .map((p) => `${Number(p[0]).toFixed(5)} ${Number(p[1]).toFixed(5)}`)
     .join(" ");
@@ -32,7 +31,6 @@ export const fetchPoiStatistics = async (polygon: LatLngTuple[]): Promise<PoiSta
 
   let data = null;
 
-  // 3. Cơ chế Retry: Thử từng server một
   for (const server of OVERPASS_SERVERS) {
     try {
       console.log(`Connecting to Overpass: ${server}...`);
@@ -43,7 +41,7 @@ export const fetchPoiStatistics = async (polygon: LatLngTuple[]): Promise<PoiSta
 
       if (response.ok) {
         data = await response.json();
-        break; // Thành công thì thoát vòng lặp
+        break; 
       } else {
         console.warn(`Server ${server} failed: ${response.status}`);
       }
@@ -52,13 +50,11 @@ export const fetchPoiStatistics = async (polygon: LatLngTuple[]): Promise<PoiSta
     }
   }
 
-  // Nếu thử hết server mà vẫn không có data
   if (!data || !data.elements) {
     console.error("All Overpass servers failed or timed out.");
     return [];
   }
 
-  // 4. Xử lý dữ liệu (Mapping)
   const stats: Record<string, number> = {
     "Trường học": 0,
     "Y tế": 0,

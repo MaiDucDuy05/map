@@ -340,14 +340,6 @@ export default function Home() {
 
   return (
     <>
-     {/* <div className="flex flex-col flex-1 h-screen">
-        <DrawingStatesContext.Provider value={ drawingStatesValue }>
-          <Toolbar />
-            <div className={cn("mx-auto w-full h-full z-1 select-none", isPresenting ? "fixed top-0 left-0 z-20" : "relative")} ref={slideThumbnailRef}>
-              <LazyMap mapViewWorkaround={mapViewWorkaround} />
-            </div>
-        </DrawingStatesContext.Provider>
-      </div> */}
       <SlidesControlContext.Provider value={slidesControlValue}>
         <LayersContext.Provider value={ layersValue }>
             <PresentationContext.Provider value={ presentationValue }>
