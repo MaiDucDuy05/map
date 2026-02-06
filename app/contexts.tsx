@@ -1,10 +1,7 @@
 "use client"
 import { Layer } from "@/types/layer";
-import dynamic from "next/dynamic";
 import { createContext, Dispatch, SetStateAction } from "react";
 import { HistoryStack } from "./history-stack";
-
-
 
 export type DrawingStates = {
   isDrawing: boolean,

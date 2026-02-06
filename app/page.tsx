@@ -4,7 +4,7 @@ import Toolbar from "@/components/home/toolbar";
 import { cn } from "@/lib/utils";
 import { Layer } from "@/types/layer";
 import dynamic from "next/dynamic";
-import {  Dispatch, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {  useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { HistoryStack } from "./history-stack";
 import { Action } from "@/types/history-stack";
 import Sidebar from "@/components/home/sidebar";
@@ -25,14 +25,6 @@ class Slide {
   slideThumbnail?: string | null = null;
 };
 
-type SlidesControlContextProps = {
-  slides: Slide[],
-  currentSlideIndex: number,
-  previousSlideIndex: number,
-  setSlides: Dispatch<SetStateAction<Slide[]>>,
-  setCurrentSlideIndex: Dispatch<SetStateAction<number>>,
-  setPreviousSlideIndex: Dispatch<SetStateAction<number>>,
-};
 
 
 export default function Home() {

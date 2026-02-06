@@ -74,7 +74,7 @@ export default function InspectingLayer() {
 
                         </Rectangle>
 
-                    {Object.entries(corners).map(([_, coord], idx) => (
+                    {Object.entries(corners).map(([, coord], idx) => (
                         <Marker
                             key={`corner-${idx}`}
                             position={coord as LatLngTuple}
