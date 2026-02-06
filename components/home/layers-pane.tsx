@@ -3,7 +3,7 @@ import { Layer } from "@/types/layer";
 import { cn } from "@/lib/utils";
 import { ArrowRight, ChevronDown, ChevronUp, Circle, Eye, EyeOff, Pin, PinOff, Square, Trash2, Type } from "lucide-react";
 import { JSX, memo, useCallback, useContext, useState } from "react";
-import { HistoryContext, LayersContext, PresentationContext } from "@/app/page";
+import { HistoryContext, LayersContext, PresentationContext } from "@/app/contexts";
 import { DeleteLayerAction } from "@/types/history-stack";
 import { LayerInfoPanel } from "./layer-info-panel";
 
@@ -112,6 +112,8 @@ const LayerItemRow = memo(function({
     </div>
   );
 });
+
+LayerItemRow.displayName = "LayerItemRow";
 
 export default function LayersPane() {
   const { layers, setLayers } = useContext(LayersContext);

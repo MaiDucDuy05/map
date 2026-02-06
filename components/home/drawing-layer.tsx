@@ -1,7 +1,7 @@
 import { Marker, Rectangle, Circle, Polyline, useMapEvents } from "react-leaflet";
 import L, { LatLngBoundsExpression, LatLngTuple, PointExpression } from 'leaflet';
 import { memo, useContext, useState, useEffect } from "react";
-import { DrawingStatesContext, HistoryContext, LayersContext, PresentationContext } from "@/app/page";
+import { DrawingStatesContext, HistoryContext, LayersContext, PresentationContext } from "@/app/contexts";
 import { v4 as uuidv4 } from "uuid";
 import { Layer } from "@/types/layer";
 import { NewLayerAction } from "@/types/history-stack";
@@ -117,7 +117,7 @@ const DrawingLayer = memo(({ onShapeCreated }: DrawingLayerProps) => {
                 switch (drawingStates.drawingMode) {
                     case 0: 
                         if (rectOrgin && rectBounds) {
-                            let bounds: LatLngBoundsExpression = [
+                            const bounds: LatLngBoundsExpression = [
                                 rectOrgin,
                                 [e.latlng.lat, e.latlng.lng]
                             ];
@@ -318,5 +318,7 @@ const DrawingLayer = memo(({ onShapeCreated }: DrawingLayerProps) => {
         </>
     );
 });
+
+DrawingLayer.displayName = "DrawingLayer";
 
 export default DrawingLayer;

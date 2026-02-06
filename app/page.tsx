@@ -4,25 +4,18 @@ import Toolbar from "@/components/home/toolbar";
 import { cn } from "@/lib/utils";
 import { Layer } from "@/types/layer";
 import dynamic from "next/dynamic";
-import { createContext, Dispatch, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {  Dispatch, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { HistoryStack } from "./history-stack";
 import { Action } from "@/types/history-stack";
 import Sidebar from "@/components/home/sidebar";
 import SlidesControl from "@/components/home/slides-control";
-import domtoimage from 'dom-to-image';
+import { DrawingStates, DrawingStatesContext, HistoryContext, LayersContext, PresentationContext, SlidesControlContext } from "./contexts";
+
 
 const LazyMap = dynamic(() => import("@/components/home/map"), {
   ssr: false,
 });
 
-export type DrawingStates = {
-  isDrawing: boolean,
-  drawingMode: number, 
-  strokeColor?: string,
-  fillColor?: string,
-  fillOpacity?: number,
-  fontSize?: number,
-};
 
 class Slide {
   layers: Layer[] = [];
@@ -41,28 +34,6 @@ type SlidesControlContextProps = {
   setPreviousSlideIndex: Dispatch<SetStateAction<number>>,
 };
 
-export const SlidesControlContext = createContext<SlidesControlContextProps>({
-  slides: [],
-  currentSlideIndex: 0,
-  previousSlideIndex: -1,
-  setSlides: () => {},
-  setCurrentSlideIndex: () => {},
-  setPreviousSlideIndex: () => {},
-});
-
-// Added separate contexts to reduce unnecessary rerenders
-export const LayersContext = createContext<{ layers: Layer[]; setLayers: Dispatch<SetStateAction<Layer[]>> }>(
-  { layers: [], setLayers: () => {} }
-);
-export const DrawingStatesContext = createContext<{ drawingStates: DrawingStates; setDrawingStates: Dispatch<SetStateAction<DrawingStates>> }>(
-  { drawingStates: { isDrawing: false, drawingMode: -1, strokeColor: "#000000", fillColor: "#FFFFFF", fillOpacity: 0.2, fontSize: 20 }, setDrawingStates: () => {} }
-);
-export const PresentationContext = createContext<{ isPresenting: boolean; setIsPresenting: Dispatch<SetStateAction<boolean>>; currentLayerIndex: number; setCurrentLayerIndex: Dispatch<SetStateAction<number>>; inspectingLayerId: string | null; setInspectingLayerId: Dispatch<SetStateAction<string | null>> }>(
-  { isPresenting: false, setIsPresenting: () => {}, currentLayerIndex: -1, setCurrentLayerIndex: () => {}, inspectingLayerId: null, setInspectingLayerId: () => {} }
-);
-export const HistoryContext = createContext<{ slideHistory: HistoryStack; setSlideHistory: Dispatch<SetStateAction<HistoryStack>>; undo: () => void; redo: () => void }>(
-  { slideHistory: new HistoryStack(), setSlideHistory: () => {}, undo: () => {}, redo: () => {} }
-);
 
 export default function Home() {
   // SLIDES CONTROL
@@ -388,7 +359,7 @@ export default function Home() {
       <SlidesControlContext.Provider value={slidesControlValue}>
         <LayersContext.Provider value={ layersValue }>
             <PresentationContext.Provider value={ presentationValue }>
-              <HistoryContext.Provider value={ historyValue}>
+              <HistoryContext.Provider value={ historyValue }>
                   <div className="flex flex-row mx-auto">
                     <SlidesControl />
                     <div className="flex flex-col flex-1 h-screen">

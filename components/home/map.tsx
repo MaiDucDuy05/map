@@ -4,8 +4,7 @@ import "leaflet/dist/leaflet.css";
 import { MapContainer, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { LatLngTuple } from 'leaflet';
-import { memo, useContext, useEffect, useState, useCallback } from "react";
-import { SlidesControlContext } from "@/app/page";
+import { memo, useEffect, useState, useCallback } from "react";
 import DrawingLayer from "./drawing-layer";
 import InspectingLayer from "./inspecting-layer";
 import Layers from "./layers";
@@ -52,36 +51,37 @@ const MapEventsHandler = ({
   return null;
 };
 
-const UpdateMapState = memo(({ mapViewWorkaround } : { mapViewWorkaround: number }) => {
-    const context = useContext(SlidesControlContext);
-    const map = useMap();
+// const UpdateMapState = memo(({ mapViewWorkaround } : { mapViewWorkaround: number }) => {
+//     const context = useContext(SlidesControlContext);
+//     const map = useMap();
 
-    useEffect(() => {
-        if (!context) return;
-        const { slides, currentSlideIndex, previousSlideIndex } = context;
+//     useEffect(() => {
+//         if (!context) return;
+//         const { slides, currentSlideIndex, previousSlideIndex } = context;
 
-        if (previousSlideIndex >= 0 && slides[previousSlideIndex]) {
-            const previousSlide = slides[previousSlideIndex];
-            previousSlide.latLng = [map.getCenter().lat, map.getCenter().lng];
-            previousSlide.mapZoom = map.getZoom();
-        }
+//         if (previousSlideIndex >= 0 && slides[previousSlideIndex]) {
+//             const previousSlide = slides[previousSlideIndex];
+//             previousSlide.latLng = [map.getCenter().lat, map.getCenter().lng];
+//             previousSlide.mapZoom = map.getZoom();
+//         }
 
-        const currentSlide = slides[currentSlideIndex];
-        if (currentSlide) {
-             const { latLng, mapZoom } = currentSlide;
-             if (!map.getCenter().equals(latLng) || map.getZoom() !== mapZoom) {
-                 map.flyTo(latLng, mapZoom, { duration: 0.2 });
-             }
-        }
-    }, [mapViewWorkaround, context, map]);
+//         const currentSlide = slides[currentSlideIndex];
+//         if (currentSlide) {
+//              const { latLng, mapZoom } = currentSlide;
+//              if (!map.getCenter().equals(latLng) || map.getZoom() !== mapZoom) {
+//                  map.flyTo(latLng, mapZoom, { duration: 0.2 });
+//              }
+//         }
+//     }, [mapViewWorkaround, context, map]);
 
-    return null;
-});
+//     return null;
+// });
 
 const Map = memo(({ mapViewWorkaround } : { mapViewWorkaround: number }) => {
     const [startPoint, setStartPoint] = useState<LatLngTuple | null>(null);
     const [endPoint, setEndPoint] = useState<LatLngTuple | null>(null);
     const [route, setRoute] = useState<RouteResult | null>(null);
+
     
     const [selectionMode, setSelectionMode] = useState<'start' | 'end' | null>(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -136,7 +136,7 @@ const Map = memo(({ mapViewWorkaround } : { mapViewWorkaround: number }) => {
             styleEl.innerHTML = inspectionStyles;
             document.head.appendChild(styleEl);
         }
-    }, []);
+    }, [mapViewWorkaround]);
 
     return (
         <div className="flex w-full h-full overflow-hidden relative">
@@ -245,5 +245,7 @@ const Map = memo(({ mapViewWorkaround } : { mapViewWorkaround: number }) => {
         </div>
     );
 });
+
+Map.displayName = "Map";
 
 export default Map;

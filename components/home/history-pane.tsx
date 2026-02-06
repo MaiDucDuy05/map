@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { ChevronUp, Eye, EyeOff, Pin, PinOff, Plus, Trash2 } from "lucide-react";
 import { memo, useCallback, useContext, useEffect, useRef } from "react";
-import { HistoryContext } from "@/app/page";
+import { HistoryContext } from "@/app/contexts";
 import { Action } from "@/types/history-stack";
 
 const HistoryRowItem = memo(({
@@ -75,7 +75,9 @@ const HistoryRowItem = memo(({
   )
 });
 
-export default function HistoryPane() {
+HistoryRowItem.displayName = "HistoryRowItem";
+
+const HistoryPane = memo(() => {
   const {
     slideHistory,
     undo,
@@ -122,3 +124,8 @@ export default function HistoryPane() {
   </>
   )
 }
+)
+
+HistoryPane.displayName = "HistoryPane";
+export default HistoryPane;
+

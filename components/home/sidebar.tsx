@@ -1,5 +1,5 @@
 import { memo, useContext } from "react";
-import { PresentationContext } from "@/app/page";
+import { PresentationContext } from "@/app/contexts";
 import LayersPane from "./layers-pane";
 import HistoryPane from "./history-pane";
 

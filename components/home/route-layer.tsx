@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { Polyline, Marker, Popup } from 'react-leaflet';
 import { LatLngTuple } from 'leaflet';
 import { RouteResult } from '@/hooks/useRouting';

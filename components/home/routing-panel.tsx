@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { LatLngTuple } from 'leaflet';
 import { useRouting, formatDistance, formatDuration, RouteResult } from '@/hooks/useRouting';
-import { MapPin, Navigation, Loader2, X, Car, PersonStanding, Bike, ArrowRightLeft } from 'lucide-react';
+import { MapPin, Navigation, Loader2, X, Car, PersonStanding, Bike, } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface RoutingPanelProps {

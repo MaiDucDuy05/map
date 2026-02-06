@@ -2,7 +2,7 @@ import { Marker, Rectangle, Circle, Polyline } from "react-leaflet";
 import L, { } from 'leaflet';
 import { CircleLayer, ArrowLayer, Layer } from "@/types/layer";
 import { memo, useContext } from "react";
-import { LayersContext, PresentationContext } from "@/app/page";
+import { LayersContext, PresentationContext } from "@/app/contexts";
 
 const ObjectLayer = memo(({
     layer,
@@ -103,6 +103,7 @@ const ObjectLayer = memo(({
             return null;
     }
 });
+ObjectLayer.displayName = "ObjectLayer";
 
 const Layers = memo(() => {
   const { currentLayerIndex, isPresenting, } = useContext(PresentationContext);
@@ -120,5 +121,7 @@ const Layers = memo(() => {
     </>
   )
 });
+
+Layers.displayName = "Layers";
 
 export default Layers;

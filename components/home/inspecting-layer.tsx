@@ -1,7 +1,7 @@
 import { Marker, Popup, Rectangle, Circle, Polyline, SVGOverlay } from "react-leaflet";
 import L, { LatLngTuple } from 'leaflet';
 import { useContext } from "react";
-import { LayersContext, PresentationContext } from "@/app/page";
+import { LayersContext, PresentationContext } from "@/app/contexts";
 import { CircleLayer, ArrowLayer } from "@/types/layer";
 
 export default function InspectingLayer() {
@@ -74,7 +74,7 @@ export default function InspectingLayer() {
 
                         </Rectangle>
 
-                    {Object.entries(corners).map(([position, coord], idx) => (
+                    {Object.entries(corners).map(([_, coord], idx) => (
                         <Marker
                             key={`corner-${idx}`}
                             position={coord as LatLngTuple}

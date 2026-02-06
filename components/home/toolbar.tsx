@@ -1,7 +1,7 @@
 import { useContext, useState, useRef, useEffect } from "react";
 import { Button } from "../ui/button";
-import { DrawingStatesContext, HistoryContext, PresentationContext } from "@/app/page";
-import { ArrowBigRight, Check, Circle, Hand, MoveRight, RectangleHorizontal, Redo, Tv, Undo, Palette, ChevronDown, Type } from "lucide-react";
+import { DrawingStatesContext, HistoryContext, PresentationContext } from "@/app/contexts";
+import {  Check, Circle, Hand, MoveRight, RectangleHorizontal, Redo, Tv, Undo, ChevronDown, Type } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const basicColors = [
@@ -64,7 +64,8 @@ function ColorPickerPopup({
             style={{
               backgroundColor: color,
               borderColor: color === "#FFFFFF" ? "#666" : "transparent",
-              boxShadow: currentColor === color ? `0 0 0 2px ${color === "#FFFFFF" ? "#666" : color}` : "none"
+              stroke: isStroke ? "#666" : "none",
+              boxShadow: currentColor === color ? `0 0 0 2px ${color === "#FFFFFF" ? "#666" : color}` : "none"              
             }}
             onClick={() => onSelectColor(color)}
             title={color}

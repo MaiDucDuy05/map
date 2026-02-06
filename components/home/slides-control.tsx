@@ -1,7 +1,7 @@
-import { SlidesControlContext } from "@/app/page";
+import { SlidesControlContext } from "@/app/contexts";
 import { cn } from "@/lib/utils";
 import { useContext, useState, useRef } from "react";
-import { Copy, Download, Upload, Trash2, MoreVertical, X, Plus } from "lucide-react";
+import { Copy, Download, Upload, Trash2, MoreVertical, Plus } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 import { Button } from "../ui/button";
 
@@ -84,7 +84,7 @@ export default function SlidesControl() {
             alert('Invalid slide format');
           }
         } catch (error) {
-          alert('Error importing slide: Invalid JSON format');
+          alert(`Error importing slide: Invalid JSON format ${error}`);
         }
       };
       reader.readAsText(file);
