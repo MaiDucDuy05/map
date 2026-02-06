@@ -7,7 +7,11 @@ import { Layer } from "@/types/layer";
 import { NewLayerAction } from "@/types/history-stack";
 import { HistoryStack } from "@/app/history-stack";
 
-const DrawingLayer = memo(() => {
+interface DrawingLayerProps {
+  onShapeCreated?: (layer: any) => void;
+}
+
+const DrawingLayer = memo(({ onShapeCreated }: DrawingLayerProps) => {
     const [rectOrgin, setRectOrigin] = useState<LatLngTuple | null>();
     const [rectBounds, setRectBounds] = useState<LatLngBoundsExpression | null>();
     const [circleCenter, setCircleCenter] = useState<LatLngTuple | null>();
@@ -21,7 +25,6 @@ const DrawingLayer = memo(() => {
     const { drawingStates } = useContext(DrawingStatesContext);
     const { setInspectingLayerId } = useContext(PresentationContext);
 
-    // autofocus on the contenteditable div when it appears
     useEffect(() => {
         if (textOrigin && drawingStates.drawingMode === 3) {
             setTimeout(() => {
@@ -62,6 +65,7 @@ const DrawingLayer = memo(() => {
             }, 0);
         }
     }, [textOrigin, drawingStates.drawingMode]);
+
 
     const map = useMapEvents({
         mousedown: (e) => {
@@ -108,10 +112,12 @@ const DrawingLayer = memo(() => {
         mouseup: (e) => {
             if (drawingStates.isDrawing) {
                 let newLayer: Layer;
+                let shapeForStats: any = null;
+
                 switch (drawingStates.drawingMode) {
-                    case 0: // Rectangle
+                    case 0: 
                         if (rectOrgin && rectBounds) {
-                            let rectBounds: LatLngBoundsExpression = [
+                            let bounds: LatLngBoundsExpression = [
                                 rectOrgin,
                                 [e.latlng.lat, e.latlng.lng]
                             ];
@@ -120,24 +126,37 @@ const DrawingLayer = memo(() => {
                                 uuid: uuidv4(),
                                 isPinned: false,
                                 isHidden: false,
-                                bounds: rectBounds,
+                                bounds: bounds,
                                 pathOptions: {
                                     color: drawingStates.strokeColor || 'blue',
                                     fillColor: drawingStates.fillColor || 'blue',
                                     fillOpacity: drawingStates.fillOpacity || 0.5,
                                 },
                             };
+                            // Tính diện tích thực tế (giữ nguyên logic của bạn)
                             newLayer.realLifeArea = map.distance(
-                                rectBounds[0],
-                                [rectBounds[0][0], rectBounds[1][1]]
+                                bounds[0] as LatLngTuple,
+                                [bounds[0][0], bounds[1][1]] as LatLngTuple
                             ) * map.distance(
-                                rectBounds[0],
-                                [rectBounds[1][0], rectBounds[0][1]]
+                                bounds[0] as LatLngTuple,
+                                [bounds[1][0], bounds[0][1]] as LatLngTuple
                             );
+                            
                             setInspectingLayerId(newLayer.uuid);
+                            
+                            shapeForStats = {
+                                getLatLngs: () => {
+                                    const p1 = bounds[0] as LatLngTuple; // Top-Left
+                                    const p2: LatLngTuple = [bounds[0][0], bounds[1][1]]; // Top-Right
+                                    const p3 = bounds[1] as LatLngTuple; // Bottom-Right
+                                    const p4: LatLngTuple = [bounds[1][0], bounds[0][1]]; // Bottom-Left
+                                    return [[p1, p2, p3, p4]]; 
+                                }
+                            };
                         }
                         break;
-                    case 1: // Circle
+                    
+                     case 1: // Circle
                         if (circleCenter && circleRadius > 0) {
                             newLayer = {
                                 type: "circle",
@@ -156,7 +175,7 @@ const DrawingLayer = memo(() => {
                             setInspectingLayerId(newLayer.uuid);
                         }
                         break;
-                    case 2: // Arrow
+                    case 2:
                         if (arrowStart && arrowEnd) {
                             newLayer = {
                                 type: "arrow",
@@ -188,75 +207,12 @@ const DrawingLayer = memo(() => {
                         } as NewLayerAction);
                         return newSlideHistory;
                     });
-                    // // Create 99 other objects with latlng near to the first object
-                    // const LIMIT:number = 99;
-                    // let generatedLayers: Layer[] = [];
-                    // setLayers((prevLayers) => {
-                    //     const newLayers = [newLayer];
-                    //     if (newLayer.type === "rectangle" && Array.isArray(newLayer.bounds)) {
-                    //         const [origin, corner] = newLayer.bounds as [LatLngTuple, LatLngTuple];
-                    //         for (let i = 1; i <= LIMIT; i++) {
-                    //             const offset = Math.random() * 0.05 - 0.025; // Random offset between -0.00025 and 0.00025
-                    //             const offset2 = Math.random() * 0.05 - 0.025; // Random offset between -0.00025 and 0.00025
-                    //             const shiftedOrigin: LatLngTuple = [origin[0] + offset, origin[1] + offset2];
-                    //             const shiftedCorner: LatLngTuple = [corner[0] + offset, corner[1] + offset2];
-                    //             newLayers.push({
-                    //                 ...newLayer,
-                    //                 uuid: uuidv4(),
-                    //                 bounds: [shiftedOrigin, shiftedCorner],
-                    //             });
-                    //         }
-                    //     } else if (newLayer.type === "circle" && newLayer.center) {
-                    //         for (let i = 1; i <= LIMIT; i++) {
-                    //             const offset = Math.random() * 0.05 - 0.025;
-                    //             const offset2 = Math.random() * 0.05 - 0.025;
-                    //             const shiftedCenter: LatLngTuple = [
-                    //                 newLayer.center[0] + offset,
-                    //                 newLayer.center[1] + offset2,
-                    //             ];
-                    //             newLayers.push({
-                    //                 ...newLayer,
-                    //                 uuid: uuidv4(),
-                    //                 center: shiftedCenter,
-                    //             });
-                    //         }
-                    //     } else if (newLayer.type === "arrow" && newLayer.start && newLayer.end) {
-                    //         for (let i = 1; i <= LIMIT; i++) {
-                    //             const offset = Math.random() * 0.05 - 0.025;
-                    //             const offset2 = Math.random() * 0.05 - 0.025;
-                    //             const shiftedStart: LatLngTuple = [
-                    //                 newLayer.start[0] + offset,
-                    //                 newLayer.start[1] + offset2,
-                    //             ];
-                    //             const shiftedEnd: LatLngTuple = [
-                    //                 newLayer.end[0] + offset,
-                    //                 newLayer.end[1] + offset2,
-                    //             ];
-                    //             newLayers.push({
-                    //                 ...newLayer,
-                    //                 uuid: uuidv4(),
-                    //                 start: shiftedStart,
-                    //                 end: shiftedEnd,
-                    //             });
-                    //         }
-                    //     }
-                    //     generatedLayers = [...newLayers];
-                    //     return [...prevLayers, ...newLayers];
-                    // });
-                    // setSlideHistory((prev: HistoryStack) => {
-                    //     const newSlideHistory = prev.copy();
-                    //     for (const newLayer of generatedLayers) {
-                    //         newSlideHistory.push({
-                    //             type: "NEW_LAYER",
-                    //             layer: { ...newLayer },
-                    //         } as NewLayerAction);
-                    //     }
-                    //     return newSlideHistory;
-                    // });
+
+                    if (onShapeCreated && shapeForStats) {
+                        onShapeCreated(shapeForStats);
+                    }
                 }
             }
-
-            // Reset all drawing states
             setRectBounds(null);
             setRectOrigin(null);
             setCircleCenter(null);
@@ -302,12 +258,11 @@ const DrawingLayer = memo(() => {
                 />
             )}
             {arrowStart && arrowEnd && drawingStates.drawingMode === 2 && (() => {
-                const dx = arrowEnd[1] - arrowStart[1]; // longitude difference
-                const dy = arrowStart[0] - arrowEnd[0]; // latitude difference (flipped for screen coordinates)
+                const dx = arrowEnd[1] - arrowStart[1];
+                const dy = arrowStart[0] - arrowEnd[0];
                 const angle = Math.atan2(dy, dx) * 180 / Math.PI;
-
                 return (
-                    <>
+                     <>
                         <Polyline
                             positions={[arrowStart, arrowEnd]}
                             pathOptions={{
@@ -319,15 +274,7 @@ const DrawingLayer = memo(() => {
                             position={arrowEnd}
                             icon={L.divIcon({
                                 className: 'arrow-head-marker-preview',
-                                html: `<div style="
-                                    width: 0;
-                                    height: 0;
-                                    border-left: 8px solid transparent;
-                                    border-right: 8px solid transparent;
-                                    border-bottom: 16px solid ${drawingStates.strokeColor || 'blue'};
-                                    transform: rotate(${angle + 90}deg);
-                                    transform-origin: center;
-                                "></div>`,
+                                html: `<div style="width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-bottom: 16px solid ${drawingStates.strokeColor || 'blue'}; transform: rotate(${angle + 90}deg); transform-origin: center;"></div>`,
                                 iconSize: [16, 16],
                                 iconAnchor: [8, 8]
                             })}
@@ -335,8 +282,9 @@ const DrawingLayer = memo(() => {
                     </>
                 );
             })()}
+
             {textOrigin && drawingStates.drawingMode === 3 && (
-                <Marker
+                 <Marker
                     position={textOrigin}
                     icon={L.divIcon({
                         className: 'text-marker-preview',
@@ -361,9 +309,12 @@ const DrawingLayer = memo(() => {
                     })}
                 />
             )}
-            <button id="confirm-text" className="bg-slate-700 px-4 py-3 text-sm rounded-sm text-white hover:bg-slate-900 font-bold absolute z-1000 right-0 m-4">
-                ✓ Confirm
-            </button>
+            
+             {textOrigin && drawingStates.drawingMode === 3 && (
+                <button id="confirm-text" className="bg-slate-700 px-4 py-3 text-sm rounded-sm text-white hover:bg-slate-900 font-bold absolute z-1000 right-0 m-4">
+                    ✓ Confirm
+                </button>
+            )}
         </>
     );
 });

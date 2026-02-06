@@ -4,7 +4,7 @@ import "leaflet/dist/leaflet.css";
 import { MapContainer, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { LatLngTuple } from 'leaflet';
-import { memo, useContext, useEffect, useState, useCallback, useMemo } from "react";
+import { memo, useContext, useEffect, useState, useCallback } from "react";
 import { SlidesControlContext } from "@/app/page";
 import DrawingLayer from "./drawing-layer";
 import InspectingLayer from "./inspecting-layer";
@@ -13,12 +13,13 @@ import { RoutingPanel } from '@/components/home/routing-panel';
 import { RouteLayer } from '@/components/home/route-layer';
 import { RouteResult } from '@/hooks/useRouting';
 import { MapSearch } from "./map-search";
+import { fetchPoiStatistics, PoiStat } from "@/utils/overpass";
+import { PoiStatsPanel } from "./poi-stats-panel";
 
 const inspectionStyles = `
   .custom-corner-marker div { transition: transform 0.2s ease; }
   .custom-corner-marker div:hover { transform: scale(1.4); background-color: #3b82f6; cursor: grab; }
   .arrow-head-marker, .arrow-head-marker-inspection, .arrow-head-marker-preview { pointer-events: none; }
-  /* Cursor styles */
   .leaflet-container.crosshair-cursor { cursor: crosshair !important; }
 `;
 
@@ -57,7 +58,7 @@ const UpdateMapState = memo(({ mapViewWorkaround } : { mapViewWorkaround: number
 
     useEffect(() => {
         if (!context) return;
-        const { slides, setSlides, currentSlideIndex, previousSlideIndex } = context;
+        const { slides, currentSlideIndex, previousSlideIndex } = context;
 
         if (previousSlideIndex >= 0 && slides[previousSlideIndex]) {
             const previousSlide = slides[previousSlideIndex];
@@ -84,8 +85,29 @@ const Map = memo(({ mapViewWorkaround } : { mapViewWorkaround: number }) => {
     
     const [selectionMode, setSelectionMode] = useState<'start' | 'end' | null>(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-    
 
+    const [poiStats, setPoiStats] = useState<PoiStat[] | null>(null);
+    const [statsLoading, setStatsLoading] = useState(false);
+
+    const handleShapeCreated = useCallback(async (layer: any) => {
+        const latlngsRaw = layer.getLatLngs();
+        const latlngs = Array.isArray(latlngsRaw[0]) ? latlngsRaw[0] : latlngsRaw; 
+
+        
+        if (latlngs && latlngs.length > 2) {
+            setStatsLoading(true);
+            setPoiStats([]); 
+            
+            const stats = await fetchPoiStatistics(latlngs);
+            
+            setPoiStats(stats);
+            setStatsLoading(false);
+        }
+    }, []);
+
+    const closeStats = useCallback(() => {
+        setPoiStats(null);
+    }, []);
 
     const handleMapClick = useCallback((latlng: LatLngTuple) => {
         if (selectionMode === 'start') {
@@ -118,12 +140,11 @@ const Map = memo(({ mapViewWorkaround } : { mapViewWorkaround: number }) => {
 
     return (
         <div className="flex w-full h-full overflow-hidden relative">
-            
             <div 
                 className={`
                     bg-slate-900 border-r border-slate-700 flex flex-col z-[1001] shadow-xl
                     transition-all duration-300 ease-in-out
-                    ${isSidebarOpen ? 'w-96 translate-x-0 opacity-100' : 'w-0 -translate-x-full opacity-0 border-none'}
+                    ${isSidebarOpen ? 'w-96 translate-x-0 opacity-100' : 'w-0 -translate-x-full opacity-0 border-none hidden'}
                 `}
             >
                 <div className="w-96 min-w-[24rem] h-full flex flex-col overflow-hidden">
@@ -142,7 +163,6 @@ const Map = memo(({ mapViewWorkaround } : { mapViewWorkaround: number }) => {
 
 
             <div className="flex-1 relative h-full w-full">
-                
                 <button
                     onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                     className={`
@@ -154,7 +174,8 @@ const Map = memo(({ mapViewWorkaround } : { mapViewWorkaround: number }) => {
                     <ChevronRight size={20} />
                 </button>
                 <button
-                    onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+     
+     onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                     className={`
                         absolute top-1/2 -translate-y-1/2 z-[1002] 
                         bg-slate-800 text-white border border-slate-600 border-l-0
@@ -167,12 +188,10 @@ const Map = memo(({ mapViewWorkaround } : { mapViewWorkaround: number }) => {
                    {isSidebarOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
                 </button>
 
-
-                {/* BANNER THÔNG BÁO CHỌN ĐIỂM */}
                 {selectionMode && (
                     <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] bg-blue-600/90 text-white px-6 py-3 rounded-full shadow-lg backdrop-blur-sm flex items-center gap-3 animate-in fade-in slide-in-from-top-4">
                         <span className="font-medium">
-                            {selectionMode === 'start' ? '📍 Chọn Điểm Bắt Đầu' : '🏁 Chọn Điểm Kết Thúc'}
+                            {selectionMode === 'start' ? ' Chọn Điểm Bắt Đầu' : 'Chọn Điểm Kết Thúc'}
                         </span>
                         <button 
                             onClick={() => setSelectionMode(null)}
@@ -182,6 +201,14 @@ const Map = memo(({ mapViewWorkaround } : { mapViewWorkaround: number }) => {
                         </button>
                     </div>
                 )}
+
+                {(poiStats !== null || statsLoading) && (
+                    <PoiStatsPanel 
+                        stats={poiStats || []} 
+                        loading={statsLoading} 
+                        onClose={closeStats} 
+                    />
+                )}
                 
                 <MapContainer
                     center={[21.03, 105.804]}
@@ -190,16 +217,17 @@ const Map = memo(({ mapViewWorkaround } : { mapViewWorkaround: number }) => {
                     keyboard={false}
                     doubleClickZoom={false}
                 >   
-                    {
-                        isSidebarOpen ? <MapSearch /> : null
-                    }
+
+                    {isSidebarOpen && <MapSearch />}
+                    
                     <TileLayer
                         attribution='&copy; Google Maps'
-                        url="http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
+                        url="https://mt0.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
                         subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
                     />
                     
-                    <DrawingLayer />
+                    <DrawingLayer onShapeCreated={handleShapeCreated} />
+                    
                     <Layers />
                     <InspectingLayer />
 
