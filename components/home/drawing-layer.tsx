@@ -14,7 +14,7 @@ interface DrawingLayerProps {
 function circleToLatLngs(
   center: LatLngTuple,
   radius: number,
-  points = 16
+  points = 16 
 ): LatLngTuple[] {
   const lat = center[0];
   const lng = center[1];

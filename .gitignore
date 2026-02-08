@@ -39,3 +39,35 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+
+# ======================
+# Python
+# ======================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.env
+venv/
+.venv/
+
+# ======================
+# Logs
+# ======================
+*.log
+data_collection.log
+
+# ======================
+# Vector DB 
+# ======================
+prepare_data/chroma_db_langchain/
+prepare_data/chroma_db/
+prepare_data/hanoi_tourism_data/
+prepare_data/embeddings.json
+
+# ======================
+# Generated / temp files
+# ======================
+prepare_data/tempCodeRunnerFile.py
+prepare_data/__pycache__/

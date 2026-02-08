@@ -1,0 +1,230 @@
+[
+  {
+    "id": "node_443033827",
+    "name": "Tượng đài Lý Thái Tổ",
+    "name_variants": {
+      "vi": null,
+      "en": "Statue of King Ly Thai To",
+      "local": "Tượng đài Lý Thái Tổ"
+    },
+    "location": {
+      "lat": 21.0274885,
+      "lon": 105.854501,
+      "address": ""
+    },
+    "layers": {
+      "basic": {
+        "type": "memorial",
+        "category": "historic",
+        "short_description": "",
+        "website": null,
+        "phone": null
+      },
+      "historical": {
+        "wikipedia_summary": "",
+        "wikipedia_url": null,
+        "wikipedia_categories": [],
+        "significance": "",
+        "historical_period": "Không rõ",
+        "related_articles": [
+          {
+            "title": "Lý Thái Tổ | Hoàn Kiếm, Hà Nội: Vị Vua Dời Đô & Dấu Ấn Lịch Sử",
+            "url": "https://hanoidep.vn/ly-thai-to-hoan-kiem-ha-noi/",
+            "summary": "Khám phá dấu ấn lịch sử tạiLýTháiTổ- một địa điểm không thể bỏ qua khi đến Hoàn Kiếm, Hà Nội, nơi hội tụ những giá trị văn hóa và tinh thần của dân tộc."
+          },
+          {
+            "title": "Tượng Đài Lý Thái Tổ: Biểu Tượng Lịch Sử Hùng Vĩ của Hà Nội",
+            "url": "https://lanvienhotel.com.vn/tuong-dai-ly-thai-to-bieu-tuong-lich-su-hung-vi-cua-ha-noi/",
+            "summary": "Khi đếnthămTượngđàiLýTháiTổ, du khách có thể kết hợpthamquannhiều điểm đến khác trong khu vực. Đây là cơ hội tuyệt vời để khám phá các khu phố cổ, những con đường nhộn nhịp với các hoạt động mua bán và thưởng thức những món ăn đặc sản của Hà Nội."
+          },
+          {
+            "title": "Tượng đài Vua Lý Thái Tổ - địa điểm vui chơi không thể bỏ lỡ",
+            "url": "https://tiepthigiadinh.vn/tuong-dai-vua-ly-thai-to-dia-diem-vui-choi-khong-the-bo-lo-tai-ha-noi-d4524.html",
+            "summary": "Qua hai vòng chấm chọn từ 29 mẫu phác thảo, mẫu của nhà điêu khắc Vi Thị Hoa, thành viên Hội Mỹ thuật Việt Nam, đã được chọn làm mẫutượngchính và vị trí đặttượngđã được quyết định là vườn hoaLýTháiTổ."
+          }
+        ]
+      },
+      "practical": {
+        "opening_hours": null,
+        "tips": [
+          "Nên mặc trang phục lịch sự, kín đáo.",
+          "Đi nhẹ nói khẽ, giữ gìn vệ sinh chung.",
+          "Nên đi sớm để tránh đông đúc."
+        ],
+        "best_time_to_visit": null,
+        "accessibility": "Chưa có thông tin",
+        "estimated_visit_duration": "1-2 giờ",
+        "admission_info": {
+          "fee_required": null,
+          "price_range": null,
+          "free_days": null
+        }
+      },
+      "cultural": {
+        "cultural_significance": "",
+        "nearby_attractions": [],
+        "food_recommendations": [
+          {
+            "name": "Phố Ngon - Cá Tràu, Gà Tắc Nướng & Lẩu Cua Sông",
+            "url": "https://www.foody.vn/ha-noi/pho-ngon-ca-trau-ga-tac-nuong-lau-cua-song",
+            "address": "15 Lý Thái Tổ, P. Lý Thái Tổ,Quận Hoàn Kiếm,Hà Nội",
+            "rating": null,
+            "review_count": 0,
+            "source": "foody",
+            "score": 50.0,
+            "price_range": "Đang mở cửa09:00 - 22:00{{item.DayOfWeek}}{{time.TimeOpen}} - {{time.TimeClose}}Đang cập nhậtTạm nghỉ{{time.Title}}30.000đ -200.000đ",
+            "image": "https://down-vn.img.susercontent.com/vn-11134259-7r98o-lwi94bwj9nmhff@resize_ss576x330"
+          },
+          {
+            "name": "Tượng Đài Lý Thái Tổ",
+            "url": "https://www.foody.vn/ha-noi/tuong-dai-ly-thai-to",
+            "address": "12 Lê Lai,Quận Hoàn Kiếm,Hà Nội",
+            "rating": null,
+            "review_count": 0,
+            "source": "foody",
+            "score": 50.0,
+            "price_range": "Đang mở cửaCả ngày{{item.DayOfWeek}}{{time.TimeOpen}} - {{time.TimeClose}}Đang cập nhậtTạm nghỉ{{time.Title}}Đang cập nhật",
+            "image": "https://down-vn.img.susercontent.com/vn-11134259-7r98o-lwgumiys2swp5e@resize_ss576x330"
+          }
+        ],
+        "events": [],
+        "local_customs": []
+      }
+    },
+    "metadata": {
+      "category": "historic",
+      "type": "memorial",
+      "has_wikipedia": false,
+      "has_image": false,
+      "data_quality_score": 0.4,
+      "tags": [
+        "memorial",
+        "historic"
+      ],
+      "suitable_for": [
+        "students",
+        "families",
+        "history_enthusiasts"
+      ]
+    },
+    "searchable_content": "Tượng đài Lý Thái Tổ Nên mặc trang phục lịch sự, kín đáo. Đi nhẹ nói khẽ, giữ gìn vệ sinh chung. Nên đi sớm để tránh đông đúc.",
+    "created_at": "2026-02-08T10:04:34.064803",
+    "data_sources": [
+      "OpenStreetMap",
+      "VnExpress Travel"
+    ]
+  },
+  {
+    "id": "node_1498111667",
+    "name": "Di Tích Lịch Sử Chùa Láng",
+    "name_variants": {
+      "vi": null,
+      "en": null,
+      "local": "Di Tích Lịch Sử Chùa Láng"
+    },
+    "location": {
+      "lat": 21.0234337,
+      "lon": 105.802772,
+      "address": ""
+    },
+    "layers": {
+      "basic": {
+        "type": "archaeological_site",
+        "category": "historic",
+        "short_description": "",
+        "website": null,
+        "phone": null
+      },
+      "historical": {
+        "wikipedia_summary": "",
+        "wikipedia_url": null,
+        "wikipedia_categories": [],
+        "significance": "",
+        "historical_period": "Không rõ",
+        "related_articles": [
+          {
+            "title": "Kinh Nghiệm Tham Quan Chùa Láng Ở Hà Nội Cho Team Tự Túc",
+            "url": "https://www.klook.com/vi/blog/chua-lang/",
+            "summary": "Hãy để Klook dẫn lối bạn khám phá không gian tâm linh yên bình củaChùaLáng, nơi lưu giữ những giá trị văn hóa vàlịchsử hàng trăm năm của đất Hà Thành. Người ta luôn nhớ về mảnh đấtkinhkỳ Thăng Long - Hà Nội với tinh hoa văn hóa và bản sắc dân tộc Việt Nam."
+          },
+          {
+            "title": "Chùa Láng ở đâu? Tìm hiểu kiến trúc và kinh nghiệm tham quan",
+            "url": "https://disanviet.net/chua-lang-o-dau-tim-hieu-kien-truc-va-kinh-nghiem-tham-quan/",
+            "summary": "Hi vọng sau khi đọc xong bài viết trên đây, các bạn đã có thể biết thêm mộtditíchlịchsử lâu đời, nắm được nguồn gốclịchsử, vị trí tọa lạc, dịp tổ chức lễ hội và kiến trúc độc đáo của ngôiChùaLángnày."
+          },
+          {
+            "title": "Chùa Láng biểu tượng tâm linh cổ kính giữa lòng thủ đô",
+            "url": "https://giaydabonghana.com/chua-lang",
+            "summary": "ChùaLángngôichùacó kiến trúc nghệ thuật độc đáo bậc nhất Hà Nội. Tìm hiểulịchsử hình thành, vẻ đẹp hàng thông cổ thụ vàkinhnghiệmchiêm báiditích."
+          }
+        ]
+      },
+      "practical": {
+        "opening_hours": null,
+        "tips": [
+          "Nên mặc trang phục lịch sự, kín đáo.",
+          "Đi nhẹ nói khẽ, giữ gìn vệ sinh chung.",
+          "Nên đi sớm để tránh đông đúc."
+        ],
+        "best_time_to_visit": null,
+        "accessibility": "Chưa có thông tin",
+        "estimated_visit_duration": "1-2 giờ",
+        "admission_info": {
+          "fee_required": null,
+          "price_range": null,
+          "free_days": null
+        }
+      },
+      "cultural": {
+        "cultural_significance": "",
+        "nearby_attractions": [],
+        "food_recommendations": [
+          {
+            "name": "Địa điểm Quán ăn tại Chùa Láng, Hà Nội",
+            "url": "https://www.foody.vn/ha-noi/quan-an-tai-khu-vuc-chua-lang",
+            "address": "ChùaLáng, Hà Nội.Foody.vnlà website #1",
+            "rating": null,
+            "review_count": 0,
+            "source": "foody",
+            "score": 50.0
+          },
+          {
+            "name": "Bánh Tráng Trộn Tina Trần - 33 Chùa Láng",
+            "url": "https://www.foody.vn/ha-noi/banh-trang-tron-tina-tran-33-chua-lang",
+            "address": "45 Ngõ 33 Phố Chùa Láng, P. Láng Thượng,Quận Đống Đa,Hà Nội",
+            "rating": 7.0,
+            "review_count": 148,
+            "source": "foody",
+            "score": 70.0,
+            "price_range": "Chưa mở cửa14:00 - 21:00{{item.DayOfWeek}}{{time.TimeOpen}} - {{time.TimeClose}}Đang cập nhậtTạm nghỉ{{time.Title}}10.000đ -25.000đ",
+            "image": "https://down-vn.img.susercontent.com/vn-11134259-7r98o-lw8blzxffg0r87@resize_ss800x450"
+          }
+        ],
+        "events": [],
+        "local_customs": []
+      }
+    },
+    "metadata": {
+      "category": "historic",
+      "type": "archaeological_site",
+      "has_wikipedia": false,
+      "has_image": false,
+      "data_quality_score": 0.4,
+      "tags": [
+        "archaeological_site",
+        "historic"
+      ],
+      "suitable_for": [
+        "students",
+        "families",
+        "history_enthusiasts"
+      ]
+    },
+    "searchable_content": "Di Tích Lịch Sử Chùa Láng Nên mặc trang phục lịch sự, kín đáo. Đi nhẹ nói khẽ, giữ gìn vệ sinh chung. Nên đi sớm để tránh đông đúc.",
+    "created_at": "2026-02-08T10:04:34.064803",
+    "data_sources": [
+      "OpenStreetMap",
+      "VnExpress Travel"
+    ]
+  }
+]

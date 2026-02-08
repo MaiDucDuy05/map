@@ -4,7 +4,7 @@ import "leaflet/dist/leaflet.css";
 import { MapContainer, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { LatLngTuple } from 'leaflet';
-import { memo, useEffect, useState, useCallback } from "react";
+import { memo, useEffect, useState, useCallback, useRef } from "react";
 import DrawingLayer from "./drawing-layer";
 import InspectingLayer from "./inspecting-layer";
 import Layers from "./layers";
@@ -12,7 +12,7 @@ import { RoutingPanel } from '@/components/home/routing-panel';
 import { RouteLayer } from '@/components/home/route-layer';
 import { RouteResult } from '@/hooks/useRouting';
 import { MapSearch } from "./map-search";
-import { fetchPoiStatistics, PoiStat } from "@/utils/overpass";
+import { fetchPoiStatistics, PoiResult } from "@/utils/overpass";
 import { PoiStatsPanel } from "./poi-stats-panel";
 
 const inspectionStyles = `
@@ -24,12 +24,18 @@ const inspectionStyles = `
 
 const MapEventsHandler = ({ 
   onMapClick, 
-  isSelecting 
+  isSelecting,
+  mapRef
 }: { 
   onMapClick: (latlng: LatLngTuple) => void;
   isSelecting: boolean;
+  mapRef: React.MutableRefObject<any>;
 }) => {
   const map = useMap();
+
+  useEffect(() => {
+    mapRef.current = map;
+  }, [map, mapRef]);
 
   useMapEvents({
     click: (e) => {
@@ -51,62 +57,42 @@ const MapEventsHandler = ({
   return null;
 };
 
-// const UpdateMapState = memo(({ mapViewWorkaround } : { mapViewWorkaround: number }) => {
-//     const context = useContext(SlidesControlContext);
-//     const map = useMap();
-
-//     useEffect(() => {
-//         if (!context) return;
-//         const { slides, currentSlideIndex, previousSlideIndex } = context;
-
-//         if (previousSlideIndex >= 0 && slides[previousSlideIndex]) {
-//             const previousSlide = slides[previousSlideIndex];
-//             previousSlide.latLng = [map.getCenter().lat, map.getCenter().lng];
-//             previousSlide.mapZoom = map.getZoom();
-//         }
-
-//         const currentSlide = slides[currentSlideIndex];
-//         if (currentSlide) {
-//              const { latLng, mapZoom } = currentSlide;
-//              if (!map.getCenter().equals(latLng) || map.getZoom() !== mapZoom) {
-//                  map.flyTo(latLng, mapZoom, { duration: 0.2 });
-//              }
-//         }
-//     }, [mapViewWorkaround, context, map]);
-
-//     return null;
-// });
-
 const Map = memo(({ mapViewWorkaround } : { mapViewWorkaround: number }) => {
+    const mapRef = useRef<any>(null);
+    
     const [startPoint, setStartPoint] = useState<LatLngTuple | null>(null);
     const [endPoint, setEndPoint] = useState<LatLngTuple | null>(null);
     const [route, setRoute] = useState<RouteResult | null>(null);
-
     
     const [selectionMode, setSelectionMode] = useState<'start' | 'end' | null>(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
-    const [poiStats, setPoiStats] = useState<PoiStat[] | null>(null);
+    const [poiResult, setPoiResult] = useState<PoiResult | null>(null);
     const [statsLoading, setStatsLoading] = useState(false);
 
     const handleShapeCreated = useCallback(async (layer: any) => {
         const latlngsRaw = layer.getLatLngs();
         const latlngs = Array.isArray(latlngsRaw[0]) ? latlngsRaw[0] : latlngsRaw; 
-
         
         if (latlngs && latlngs.length > 2) {
             setStatsLoading(true);
-            setPoiStats([]); 
+            setPoiResult(null);
             
-            const stats = await fetchPoiStatistics(latlngs);
+            const result = await fetchPoiStatistics(latlngs);
             
-            setPoiStats(stats);
+            setPoiResult(result);
             setStatsLoading(false);
         }
     }, []);
 
+    const handleLocationClick = useCallback((lat: number, lon: number) => {
+        if (mapRef.current) {
+            mapRef.current.setView([lat, lon], 18);
+        }
+    }, []);
+
     const closeStats = useCallback(() => {
-        setPoiStats(null);
+        setPoiResult(null);
     }, []);
 
     const handleMapClick = useCallback((latlng: LatLngTuple) => {
@@ -161,7 +147,6 @@ const Map = memo(({ mapViewWorkaround } : { mapViewWorkaround: number }) => {
                 </div>
             </div>
 
-
             <div className="flex-1 relative h-full w-full">
                 <button
                     onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -173,9 +158,9 @@ const Map = memo(({ mapViewWorkaround } : { mapViewWorkaround: number }) => {
                 >
                     <ChevronRight size={20} />
                 </button>
+                
                 <button
-     
-     onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                    onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                     className={`
                         absolute top-1/2 -translate-y-1/2 z-[1002] 
                         bg-slate-800 text-white border border-slate-600 border-l-0
@@ -191,7 +176,7 @@ const Map = memo(({ mapViewWorkaround } : { mapViewWorkaround: number }) => {
                 {selectionMode && (
                     <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] bg-blue-600/90 text-white px-6 py-3 rounded-full shadow-lg backdrop-blur-sm flex items-center gap-3 animate-in fade-in slide-in-from-top-4">
                         <span className="font-medium">
-                            {selectionMode === 'start' ? ' Chọn Điểm Bắt Đầu' : 'Chọn Điểm Kết Thúc'}
+                            {selectionMode === 'start' ? 'Chọn Điểm Bắt Đầu' : 'Chọn Điểm Kết Thúc'}
                         </span>
                         <button 
                             onClick={() => setSelectionMode(null)}
@@ -202,11 +187,13 @@ const Map = memo(({ mapViewWorkaround } : { mapViewWorkaround: number }) => {
                     </div>
                 )}
 
-                {(poiStats !== null || statsLoading) && (
+                {(poiResult !== null || statsLoading) && (
                     <PoiStatsPanel 
-                        stats={poiStats || []} 
+                        stats={poiResult?.stats || []} 
+                        details={poiResult?.details || []}
                         loading={statsLoading} 
-                        onClose={closeStats} 
+                        onClose={closeStats}
+                        onLocationClick={handleLocationClick}
                     />
                 )}
                 
@@ -217,7 +204,6 @@ const Map = memo(({ mapViewWorkaround } : { mapViewWorkaround: number }) => {
                     keyboard={false}
                     doubleClickZoom={false}
                 >   
-
                     {isSidebarOpen && <MapSearch />}
                     
                     <TileLayer
@@ -233,7 +219,8 @@ const Map = memo(({ mapViewWorkaround } : { mapViewWorkaround: number }) => {
 
                     <MapEventsHandler 
                         onMapClick={handleMapClick} 
-                        isSelecting={selectionMode !== null} 
+                        isSelecting={selectionMode !== null}
+                        mapRef={mapRef}
                     />
                     <RouteLayer
                         route={route}
