@@ -116,104 +116,6 @@ def load_documents_from_json(file_path: Path) -> List[Document]:
     logger.info(f"Đã load {len(documents)} documents từ JSON với đầy đủ thông tin chi tiết.")
     return documents
 
-# def main():
-
-#     docs = load_documents_from_json(DATA_PATH)
-#     text_splitter = CharacterTextSplitter(
-#         separator="\n\n",
-#         chunk_size=1000,
-#         chunk_overlap=200,
-#         length_function=len,
-#         is_separator_regex=False,
-#     )
-    
-#     # Thực hiện split
-#     logger.info("  Đang chia nhỏ văn bản (Splitting)...")
-#     split_docs = text_splitter.split_documents(docs)
-#     logger.info(f"   => Tạo ra {len(split_docs)} chunks từ {len(docs)} documents gốc.")
-
-#     # 3. Khởi tạo Embedding Model (Google Gemini)
-#     logger.info(" Khởi tạo Google Generative AI Embeddings...")
-#     embeddings = GoogleGenerativeAIEmbeddings(
-#         model="models/gemini-embedding-001", 
-#         task_type="retrieval_document",
-#         google_api_key=os.environ["GOOGLE_API_KEY"]
-#     )
-
-#     # 4. Tạo và Lưu vào ChromaDB
-#     # Xóa DB cũ nếu muốn làm mới hoàn toàn
-#     # if CHROMA_PATH.exists():
-#     #     logger.warning(f"Xóa thư mục DB cũ: {CHROMA_PATH}")
-#     #     shutil.rmtree(CHROMA_PATH)
-
-#     logger.info(f"Đang import vào ChromaDB tại: {CHROMA_PATH}")
-#     logger.info(f" Khởi tạo ChromaDB tại {CHROMA_PATH}")
-#     vector_store = Chroma(
-#         embedding_function=embeddings,
-#         persist_directory=str(CHROMA_PATH)
-#     )
-
-#     try:
-#         existing_count = vector_store._collection.count()
-#         logger.info(f"Database đang có sẵn: {existing_count} chunks.")
-#     except:
-#         existing_count = 0
-#         logger.info(" Database chưa có dữ liệu.")
-
-#     # 5. TÍNH TOÁN ĐIỂM BẮT ĐẦU (RESUME LOGIC)
-#     if existing_count > 0:
-#         if existing_count >= total_docs:
-#             logger.info(" Dữ liệu đã đầy đủ (Full). Không cần chạy nữa!")
-#             return
-        
-#         logger.info(f"Đã làm xong {existing_count} cái. Sẽ bỏ qua và chạy tiếp từ cái thứ {existing_count + 1}...")
-#         docs_to_process = all_split_docs[existing_count:]
-#     else:
-#         docs_to_process = all_split_docs
-
-#     logger.info(f" Bắt đầu import {len(docs_to_process)} chunks còn lại.")
-
-#     BATCH_SIZE = 10
-#     DELAY_SECONDS = 3
-
-#     total_docs = len(split_docs)
-#     logger.info(f" Bắt đầu import {total_docs} documents theo lô (Batch size: {BATCH_SIZE})...")
-
-#     for i in range(0, total_docs, BATCH_SIZE):
-#         batch = split_docs[i : i + BATCH_SIZE]
-        
-#         try:
-#             vector_store.add_documents(documents=batch)
-#             logger.info(f"    Đã import lô {i//BATCH_SIZE + 1} ({len(batch)} docs). Đang nghỉ {DELAY_SECONDS}s...")
-#             time.sleep(DELAY_SECONDS)
-            
-#         except Exception as e:
-#             logger.error(f"Lỗi khi import lô {i}: {e}")
-#             time.sleep(20) 
-#             try:
-#                 vector_store.add_documents(documents=batch)
-#                 logger.info(f"   Retry thành công lô {i}.")
-#             except:
-#                 logger.error(f" Bỏ qua lô {i} do lỗi lặp lại.")
-
-#     logger.info("Import hoàn tất! Vector Database đã sẵn sàng.")
-
-#     # --- Test thử Search ---
-#     print("\n" + "="*50)
-#     print(" TEST SEARCH (KIỂM TRA)")
-#     print("="*50)
-    
-#     query = "Các địa điểm du lịch lịch sử ở Hà Nội?"
-#     results = vector_store.similarity_search(query, k=3)
-    
-#     for i, res in enumerate(results):
-#         print(f"Top {i+1}: {res.metadata.get('name')}")
-#         print(f"   Content: {res.page_content[:100]}...")
-#         print("-" * 30)
-
-# if __name__ == "__main__":
-#     main()
-
 
 def main():
     # 1. Load & Split (Vẫn load lại từ đầu để đảm bảo khớp thứ tự)
@@ -236,7 +138,7 @@ def main():
     # # 3. Khởi tạo Embedding
     logger.info(" Khởi tạo Google Embeddings ")
     embeddings = GoogleGenerativeAIEmbeddings(
-        model="models/gemini-embedding-001",
+        model="models/gemini-gemini-embedding-001",
         task_type="retrieval_document",
         google_api_key=GOOGLE_API_KEY
     )
