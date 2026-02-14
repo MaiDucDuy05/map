@@ -1,1 +1,0 @@
-export { creatMapLookupTool } from "./searchTool";
