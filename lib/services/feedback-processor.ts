@@ -205,9 +205,10 @@ export class FeedbackProcessor {
 
     const [result] = await db.collection('feedback').aggregate(pipeline).toArray();
 
-    const typeMap = new Map(
-      result.by_type.map((t: any) => [t._id, t.count])
-    );
+
+
+    const typeMap = new Map<string, number>();
+
 
     const total = Array.from(typeMap.values()).reduce((a, b) => a + b, 0);
     const thumbsUp = typeMap.get('thumbs_up') || 0;

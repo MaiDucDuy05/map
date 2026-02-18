@@ -5,6 +5,7 @@ import { createLocationMention } from '../db/models/location-mention';
 import { getAgentInstance } from '@/lib/langchain/services/agent-service';
 import { Document } from "@langchain/core/documents";
 
+
 interface ProcessQueryResult {
   response: string;
   sources: Array<{
@@ -65,17 +66,24 @@ export class ConversationalRAG {
     let conversation = await conversations.findOne({ session_id: sessionId });
     
     if (!conversation) {
-      conversation = {
+      const newConversation = {
         session_id: sessionId,
         user_id: userId,
         created_at: new Date(),
         last_active: new Date(),
         messages: [],
         user_preferences: {},
-        metadata: { total_turns: 0, language: 'vi' }
+        metadata: { total_turns: 0, language: "vi" }
       };
-      await conversations.insertOne(conversation);
+
+      const result = await conversations.insertOne(newConversation);
+
+      conversation = {
+        _id: result.insertedId,
+        ...newConversation
+      };
     }
+
 
     // Step 2: Build context window
     const contextWindow = this.buildContextWindow(conversation.messages, 3);

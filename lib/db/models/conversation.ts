@@ -9,6 +9,8 @@ export interface Message {
     extracted_entities?: string[];
     intent?: string;
     sources?: string[];
+    context_used?:boolean;
+    locations_found?:number;
     confidence?: number;
     coordinates?: {
       lat: number;
