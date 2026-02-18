@@ -1,7 +1,8 @@
+// lib/services/conversational-rag.ts
 import { MongoClient } from 'mongodb';
 import { Conversation } from '../db/models/conversation';
 import { createLocationMention } from '../db/models/location-mention';
-import { HanoiTravelRAG, getRAGInstance } from '../langchain/rag-service';
+import { getAgentInstance } from '@/lib/langchain/services/agent-service';
 import { Document } from "@langchain/core/documents";
 
 interface ProcessQueryResult {
@@ -12,19 +13,25 @@ interface ProcessQueryResult {
     coordinates?: { lat: number; lng: number };
     category?: string;
     tips?: string[];
+    nearbyRestaurants?: string[];
   }>;
   conversationId: string;
-  extractedLocations?: Array<{
+  extractedLocations: Array<{
     name: string;
     coordinates: { lat: number; lng: number };
     category: string;
     nearbyRestaurants?: string[];
     visitDuration?: string;
   }>;
+  mapActions: Array<{
+    type: string;
+    args: any;
+  }>;
   debugInfo?: {
     contextUsed: string;
     retrievedDocs: number;
     preferences: any;
+    toolCallsCount: number;
     documentsUsed?: Array<{
       name: string;
       relevanceScore?: number;
@@ -33,16 +40,14 @@ interface ProcessQueryResult {
 }
 
 /**
- * Integrated Conversational RAG Service
- * Kết hợp: Python RAG + MongoDB Memory + Entity Tracking
+ * Conversational RAG Service with LangGraph Agent
+ * Integrates: LangGraph Agent + MongoDB Memory + Entity Tracking
  */
 export class ConversationalRAG {
   private mongoClient: MongoClient;
-  private ragService: HanoiTravelRAG;
   
-  constructor(mongoClient: MongoClient, ragService: HanoiTravelRAG) {
+  constructor(mongoClient: MongoClient) {
     this.mongoClient = mongoClient;
-    this.ragService = ragService;
   }
 
   /**
@@ -72,27 +77,24 @@ export class ConversationalRAG {
       await conversations.insertOne(conversation);
     }
 
-    // Step 2: Build context
+    // Step 2: Build context window
     const contextWindow = this.buildContextWindow(conversation.messages, 3);
 
-    // Step 3: Enhance query if needed
-    const enhancedQuery = this.shouldUseContext(userQuery, contextWindow) 
-      ? this.enhanceQueryWithContext(userQuery, contextWindow, conversation.user_preferences)
-      : userQuery;
 
-    console.log(`Query: "${userQuery}"`);
-    if (enhancedQuery !== userQuery) {
-      console.log(`Enhanced with context`);
-    }
-
-    // Step 4: RAG query
-    const ragResponse = await this.ragService.query(enhancedQuery);
+    // Step 3: Get user preferences
+    const userPreferences = conversation?.user_preferences || {};
 
 
-    //  Extract rich metadata from context documents
+    // Step 4: Run LangGraph Agent
+    const agent = await getAgentInstance();
+    const ragResponse = await agent.query(userQuery, sessionId, {
+      userId,
+      conversationContext: contextWindow,
+      userPreferences,
+    });
+
     const extractedLocations = this.extractLocationData(ragResponse.context);
-    
-    // : Enhance sources with coordinates and metadata
+
     const enhancedSources = ragResponse.sources.map((source, idx) => {
       const doc = ragResponse.context[idx];
       if (!doc) return source;
@@ -105,24 +107,26 @@ export class ConversationalRAG {
       };
     });
 
-    // Step 5: Extract & save entities (Enhanced với context)
+
+    // Step 5: Extract entities from response
     const entities = await this.extractEntities(
       userQuery, 
       ragResponse.answer,
       ragResponse.context
     );
-    
+
+    // Step 6: Save location mentions to MongoDB
     if (entities.length > 0 && extractedLocations) {
       await this.saveLocationMentions(sessionId, entities, userQuery, userId,extractedLocations );
     }
 
-    // Step 6: Update preferences
+    // Step 7: Update user preferences based on entities
     const updatedPreferences = this.updateUserPreferences(
-      conversation.user_preferences || {},
-      entities
+      userPreferences,
+      entities,
     );
 
-    // Step 7: Save conversation
+    // Step 8: Save conversation to MongoDB
     await conversations.updateOne(
       { session_id: sessionId },
       {
@@ -158,15 +162,19 @@ export class ConversationalRAG {
       }
     );
 
+
+    // Step 9: Return formatted result
     return {
       response: ragResponse.answer,
       sources: enhancedSources,
       extractedLocations,
+      mapActions: ragResponse.mapActions,
       conversationId: conversation._id?.toString() || '',
       debugInfo: {
         contextUsed: contextWindow,
-        retrievedDocs: ragResponse.context.length,
+        retrievedDocs: ragResponse.sources.length,
         preferences: updatedPreferences,
+        toolCallsCount: ragResponse.toolCalls.length,
         documentsUsed: ragResponse.context.map(doc => ({
           name: doc.metadata?.name || 'Unknown',
           relevanceScore: doc.metadata?.score,
@@ -175,28 +183,53 @@ export class ConversationalRAG {
     };
   }
 
-  // ========== HELPER METHODS ==========
+  /**
+   * Get conversation by sessionId
+   */
+  async getConversation(sessionId: string): Promise<Conversation | null> {
+    const db = this.mongoClient.db();
+    return db.collection<Conversation>('conversations').findOne({ 
+      session_id: sessionId 
+    });
+  }
 
-  private buildContextWindow(messages: any[], windowSize: number = 3): string {
+  /**
+   * Get conversation statistics
+   */
+  async getConversationStats(sessionId: string) {
+    const conversation = await this.getConversation(sessionId);
+    
+    if (!conversation) {
+      return null;
+    }
+
+    const totalMessages = conversation.messages.length;
+    const userMessages = conversation.messages.filter(m => m.role === 'user').length;
+    const assistantMessages = conversation.messages.filter(m => m.role === 'assistant').length;
+
+    return {
+      sessionId: conversation.session_id,
+      totalMessages,
+      userMessages,
+      assistantMessages,
+      totalTurns: conversation.metadata?.total_turns || 0,
+      createdAt: conversation.created_at,
+      lastActive: conversation.last_active,
+      preferences: conversation.user_preferences,
+    };
+  }
+
+  // ========== PRIVATE HELPER METHODS ==========
+
+  /**
+   * Build context window from recent messages
+   */
+   private buildContextWindow(messages: any[], windowSize: number = 3): string {
     if (messages.length === 0) return '';
     const recentMessages = messages.slice(-windowSize * 2);
     return recentMessages
       .map(msg => `${msg.role === 'user' ? 'Người dùng' : 'Trợ lý'}: ${msg.content}`)
       .join('\n');
-  }
-
-  private shouldUseContext(query: string, context: string): boolean {
-    if (!context) return false;
-    const pronouns = ['đó', 'này', 'nó', 'ở đây', 'vậy', 'thế'];
-    return pronouns.some(p => query.toLowerCase().includes(p)) || query.length < 50;
-  }
-
-  private enhanceQueryWithContext(query: string, context: string, preferences?: any): string {
-    let enhanced = `Dựa trên cuộc hội thoại:\n${context}\n\nCâu hỏi: ${query}`;
-    if (preferences?.preferred_categories?.length) {
-      enhanced += `\n(Sở thích: ${preferences.preferred_categories.join(', ')})`;
-    }
-    return enhanced;
   }
 
   //   Extract location data from RAG context documents
@@ -222,7 +255,7 @@ export class ConversationalRAG {
     }).filter(loc => loc.coordinates.lat !== 0);
   }
 
-  // ✨ NEW: Parse coordinates from document content
+  // NEW: Parse coordinates from document content
   private parseCoordinates(content: string): { lat: number; lng: number } | null {
     const match = content.match(/Tọa độ:\s*([\d.]+),\s*([\d.]+)/);
     if (match) {
@@ -377,15 +410,14 @@ export class ConversationalRAG {
     return null;
   }
 
-  async getConversation(sessionId: string): Promise<Conversation | null> {
-    const db = this.mongoClient.db();
-    return db.collection<Conversation>('conversations').findOne({ session_id: sessionId });
-  }
 }
 
+/**
+ * Factory function to create ConversationalRAG instance
+ */
 export async function createIntegratedRAG(mongoClient: MongoClient): Promise<ConversationalRAG> {
-  const ragService = await getRAGInstance();
-  return new ConversationalRAG(mongoClient, ragService);
+  console.log('🔧 Creating ConversationalRAG instance with LangGraph Agent');
+  return new ConversationalRAG(mongoClient);
 }
 
 export default ConversationalRAG;

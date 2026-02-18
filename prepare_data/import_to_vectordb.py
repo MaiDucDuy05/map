@@ -138,7 +138,7 @@ def main():
     # # 3. Khởi tạo Embedding
     logger.info(" Khởi tạo Google Embeddings ")
     embeddings = GoogleGenerativeAIEmbeddings(
-        model="models/gemini-gemini-embedding-001",
+        model="models/gemini-embedding-001",
         task_type="retrieval_document",
         google_api_key=GOOGLE_API_KEY
     )

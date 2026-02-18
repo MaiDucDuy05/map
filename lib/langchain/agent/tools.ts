@@ -1,44 +1,75 @@
 // langchain/agent/tools.ts
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
-import { Chroma } from "@langchain/community/vectorstores/chroma";
-import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 import { MongoClient } from "mongodb";
+import { getVectorStore } from '@/lib/langchain/agent/vectorStore';
 import "dotenv/config";
 
-// ===== VECTOR SEARCH TOOL =====
+
 export const vectorSearchTool = tool(
-  async ({ query }: { query: string }) => {
+  async ({ query, k = 5 }: { query: string; k?: number }) => {
     try {
-      const embeddings = new GoogleGenerativeAIEmbeddings({
-        model: "models/gemini-embedding-001",
-        apiKey: process.env.GOOGLE_API_KEY,
-      });
-
-      const vectorStore = await Chroma.fromExistingCollection(embeddings, {
-        collectionName: "langchain",
-        url: process.env.CHROMA_URL,
-      });
-
-      const docs = await vectorStore.similaritySearch(query, 3);
+      const vectorStore = await getVectorStore();
+      const results = await vectorStore.similaritySearchWithScore(query, k);
       
       return JSON.stringify({
         success: true,
-        count: docs.length,
-        documents: docs.map(doc => ({
+        count: results.length,
+        query: query,
+        documents: results.map(([doc, score]) => ({
+          name: doc.metadata.name || "Unknown",
+          category: doc.metadata.category || "unknown",
+          coordinates: {
+            lat: doc.metadata.lat || 0,
+            lon: doc.metadata.lon || 0,
+          },
+          address: doc.metadata.address || "",
           content: doc.pageContent,
-          metadata: doc.metadata,
+          score: score,
+          metadata: {
+            id: doc.metadata.id,
+            name_en: doc.metadata.name_en,
+            type: doc.metadata.type,
+            tags: doc.metadata.tags,
+            quality_score: doc.metadata.quality_score,
+            historical_period: doc.metadata.historical_period,
+            opening_hours: doc.metadata.opening_hours,
+            visit_duration: doc.metadata.visit_duration,
+            tips: doc.metadata.tips || [],
+            nearby_restaurants: doc.metadata.nearby_restaurants || [],
+          },
         })),
       });
     } catch (error) {
-      return JSON.stringify({ success: false, error: String(error) });
+      console.error("Vector search error:", error);
+      return JSON.stringify({ 
+        success: false, 
+        error: error instanceof Error ? error.message : String(error),
+        query: query,
+      });
     }
   },
   {
     name: "vector_search",
-    description: "Search Hanoi travel knowledge base for locations, restaurants, and tourist information. Returns detailed information including coordinates, tips, and nearby restaurants.",
+    description: `Search the Hanoi travel knowledge base for locations, restaurants, and tourist information. 
+    Returns detailed information including:
+    - Location name and coordinates (lat, lon)
+    - Category and type (temple, restaurant, museum, etc.)
+    - Address and historical period
+    - Opening hours and visit duration
+    - Practical tips for visiting
+    - Nearby restaurants recommendations
+    - Quality score and relevance score
+    
+    Use this tool when users ask about:
+    - Specific places in Hanoi
+    - Tourist attractions and landmarks
+    - Food and restaurant recommendations
+    - Historical sites and their significance
+    - Practical travel information`,
     schema: z.object({
-      query: z.string().describe("Search query for Hanoi travel information"),
+      query: z.string().describe("Search query for Hanoi travel information (Vietnamese or English)"),
+      k: z.number().optional().default(5).describe("Number of results to return (default: 5, max: 10)"),
     }),
   }
 );

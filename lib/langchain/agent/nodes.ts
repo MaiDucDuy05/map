@@ -1,40 +1,12 @@
 // langchain/agent/nodes.ts
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
-import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
-import { Chroma } from "@langchain/community/vectorstores/chroma";
 import { Document } from "@langchain/core/documents";
 import { SystemMessage } from "@langchain/core/messages";
 import { AgentStateType } from "./state";
 import { allTools } from "./tools";
-import { extractAllLocations } from "../utils/extractors";
+import { extractAllLocations } from "@/lib/langchain/utils/extractors";
 import { END } from "@langchain/langgraph";
-
-let vectorStoreInstance: Chroma | null = null;
-let isVectorStoreInitialized = false;
-
-async function getVectorStore(): Promise<Chroma> {
-  if (!vectorStoreInstance || !isVectorStoreInitialized) {
-    
-    const embeddings = new GoogleGenerativeAIEmbeddings({
-      model: "models/gemini-embedding-001",
-      apiKey: process.env.GOOGLE_API_KEY,
-    });
-
-    vectorStoreInstance = await Chroma.fromExistingCollection(embeddings, {
-      collectionName: "langchain",
-      url: process.env.CHROMA_URL,
-      collectionMetadata: {
-        "hnsw:space": "l2",
-      },
-    });
-
-    isVectorStoreInitialized = true;
-    console.log("Vector Store initialized");
-  }
-
-  return vectorStoreInstance;
-}
-
+import { getVectorStore } from '@/lib/langchain/agent/vectorStore';
 
 // ===== NODE 1: ROUTER =====
 export async function routerNode(state: AgentStateType) {
@@ -223,11 +195,11 @@ export function shouldContinue(state: AgentStateType) {
   const lastMessage = state.messages[state.messages.length - 1];
   
   if (lastMessage && 'tool_calls' in lastMessage && lastMessage.tool_calls?.length) {
-    console.log(`🔧 Routing to tools (${lastMessage.tool_calls.length} calls)`);
+    console.log(` Routing to tools (${lastMessage.tool_calls.length} calls)`);
     return "tools";
   }
   
-  console.log("✅ Ending workflow");
+  console.log("Ending workflow");
   return END;
 }
 
