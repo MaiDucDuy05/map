@@ -43,7 +43,7 @@ export interface UseChatOptions {
   onError?: (error: Error) => void;
   persistSession?: boolean;
   storageKey?: string;
-  onMapAction?: (action: MapAction) => void; // ✨ NEW: Callback for map actions
+  onMapAction?: (action: MapAction) => void; 
 }
 
 // Storage helper functions remain the same...
@@ -105,7 +105,7 @@ export function useChat(options: UseChatOptions = {}) {
     onError,
     persistSession = true,
     storageKey: customStorageKey,
-    onMapAction // ✨ NEW
+    onMapAction
   } = options;
 
   const storageKey = getStorageKey(userId, customStorageKey);
@@ -191,13 +191,13 @@ export function useChat(options: UseChatOptions = {}) {
           content: data.data.response,
           timestamp: new Date(),
           sources: data.data.sources,
-          extractedLocations: data.data.extractedLocations, // ✨ NEW
-          mapActions: data.data.mapActions // ✨ NEW
+          extractedLocations: data.data.extractedLocations, // 
+          mapActions: data.data.mapActions // 
         };
         
         setMessages(prev => [...prev, assistantMessage]);
 
-        // ✨ Execute map actions if callback provided
+        //  Execute map actions if callback provided
         if (data.data.mapActions && onMapAction) {
           data.data.mapActions.forEach((action: MapAction) => {
             onMapAction(action);

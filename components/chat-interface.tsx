@@ -1,6 +1,6 @@
 // components/Chatbot.tsx
 import { useState, useRef, useEffect } from 'react';
-import { MapAction, useChat, useFeedback } from '@/hooks/use-chat';
+import { MapAction, useChat, useFeedback } from '@/hooks/useChat';
 import { MapControl } from '@/types/map-controls';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';

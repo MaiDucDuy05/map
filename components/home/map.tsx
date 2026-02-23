@@ -17,7 +17,7 @@ import { fetchPoiStatistics, PoiResult } from "@/utils/overpass";
 import { PoiStatsPanel } from "./poi-stats-panel";
 import Chatbot from '@/components/chat-interface';
 import { MapControl } from '@/types/map-controls';
-import { MapAction } from '@/hooks/use-chat';
+import { MapAction } from '@/hooks/useChat';
 
 const inspectionStyles = `
   .custom-corner-marker div { transition: transform 0.2s ease; }

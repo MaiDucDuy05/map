@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Chat API error:', error);
+    console.error(' Chat API error:', error);
     
     return NextResponse.json(
       { 
@@ -111,7 +111,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Get conversation error:', error);
+    console.error('Get conversation error:', error);
     
     return NextResponse.json(
       { 
@@ -170,7 +170,7 @@ export async function DELETE(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Delete conversation error:', error);
+    console.error('Delete conversation error:', error);
     
     return NextResponse.json(
       { 
